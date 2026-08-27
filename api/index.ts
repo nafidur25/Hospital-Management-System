@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express, { type Request, type Response, type NextFunction } from "express";
+import express, { type Response, type NextFunction } from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "../server/_core/oauth";
 import { registerStorageProxy } from "../server/_core/storageProxy";
@@ -27,7 +27,7 @@ app.use("/api/trpc", trpcMiddleware);
 app.use("/trpc", trpcMiddleware);
 
 // JSON error handler to prevent HTML/text error pages from breaking tRPC JSON parser
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: any, _req: unknown, res: Response, _next: NextFunction) => {
   console.error("[Server Error]", err);
   if (!res.headersSent) {
     res.status(500).json({

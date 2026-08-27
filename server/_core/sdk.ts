@@ -2,7 +2,7 @@ import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS, decodeOAuthState } from "@s
 import { ForbiddenError } from "@shared/_core/errors";
 import axios, { type AxiosInstance } from "axios";
 import { parse as parseCookieHeader } from "cookie";
-import type { Request } from "express";
+import type { IncomingHttpHeaders } from "node:http";
 import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
@@ -255,9 +255,11 @@ class SDKServer {
     } as GetUserInfoWithJwtResponse;
   }
 
-  async authenticateRequest(req: Request): Promise<AuthenticatedUser> {
+  async authenticateRequest(req: { headers?: IncomingHttpHeaders }): Promise<AuthenticatedUser> {
+    const headers = req.headers ?? {};
+
     // 1. Prefer the session cookie (regular OAuth login).
-    const cookieHeader = req.headers ? (req.headers.cookie as string | undefined) : undefined;
+    const cookieHeader = typeof headers.cookie === "string" ? headers.cookie : undefined;
     const cookies = this.parseCookies(cookieHeader);
     let sessionToken = cookies.get(COOKIE_NAME);
 
@@ -265,7 +267,7 @@ class SDKServer {
     //    sessionStorage), used when the browser blocks iframe cookies such as
     //    Safari ITP, private browsing, or iOS/Android WebView.
     if (!sessionToken) {
-      const authHeader = req.headers ? req.headers.authorization : undefined;
+      const authHeader = headers.authorization;
       if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
         sessionToken = authHeader.slice(7);
       }
