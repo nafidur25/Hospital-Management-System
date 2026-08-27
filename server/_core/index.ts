@@ -44,12 +44,27 @@ async function startServer() {
       createContext,
     })
   );
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
+
+  // Error handling middleware returning JSON
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error("[Server Error]", err);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: {
+          message: err?.message || "Internal server error",
+          code: "INTERNAL_SERVER_ERROR",
+        },
+      });
+    }
+  });
+
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
