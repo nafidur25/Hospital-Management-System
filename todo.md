@@ -1,0 +1,70 @@
+# Authenticated Scheduling Upgrade Checklist
+
+- [x] Upgrade the static interface to the full-stack authentication and database template.
+- [x] Add persistent HMS data models for clinicians, patients, availability windows, appointments, bills, and payments.
+- [x] Create protected procedures for loading data, computing availability, and booking appointments without conflicts.
+- [x] Seed a small development dataset from the existing HMS demonstration records.
+- [x] Add protected login, logout, session-aware navigation, and a signed-out entry state.
+- [x] Build the calendar scheduler with clinician filters, appointment slots, availability states, and booking confirmation.
+- [x] Connect the patient, appointment, and billing views to persistent procedures.
+- [x] Test authentication, conflict prevention, data mutation, TypeScript, production build, and responsive UI.
+- [x] Verify the signed-out authentication entry state and protected-session access behavior in the browser.
+- [x] Add and run focused tests for conflict and outside-availability rejection in the booking logic.
+- [x] Verify persistent patient and payment mutations through protected server procedures.
+- [x] Exercise and document the signed-out browser entry state for the protected HMS workspace.
+- [x] Run an integration-style database persistence check for patient creation and payment status recalculation.
+- [x] Define Admin, Doctor, and Receptionist permissions across scheduling, clinical records, billing, and reporting.
+- [x] Extend the user role model and add clinician-user associations for role-aware clinical actions.
+- [x] Add persistent clinical-note, prescription, prescription-item, laboratory-order, and laboratory-result data models.
+- [x] Build protected procedures for listing and creating patient medical records with role enforcement.
+- [x] Seed representative clinical notes, prescriptions, and laboratory orders for development demonstration.
+- [x] Build patient medical-record interfaces for clinical notes, prescriptions, and laboratory orders/results.
+- [x] Restrict navigation and actions in the UI according to Admin, Doctor, and Receptionist permissions.
+- [x] Test role boundaries, medical-record persistence, TypeScript, production build, and responsive layouts.
+- [x] Add explicit page-level guards for direct restricted view URLs and render a clear access-denied state.
+- [x] Prevent non-billing and non-reporting roles from receiving billing and report data through the overview response.
+- [x] Add tests for direct view guards, Billing, Clinical, Reports, and appointment-status role restrictions.
+- [x] Minimize overview financial and report-derivable fields for non-reporting roles.
+- [x] Add UI-level verification that unauthorized direct view URLs render the access-denied state.
+- [x] Verify response shapes and appointment transitions across all three staff roles.
+- [x] Return billing detail only inside the Billing module and remove financial aggregates from overview responses for non-reporting roles.
+- [x] Add a rendered Home component test that asserts the access-denied UI for unauthorized direct workspace view states.
+- [x] Add role-specific overview response-shape tests and complete the appointment transition matrix.
+- [x] Fetch and render billing information only within the Billing workspace for authorized staff roles.
+- [x] Add complete Admin, Doctor, and Receptionist coverage for Scheduled, Checked in, Completed, and Cancelled appointment status mutations.
+- [x] Verify unauthorized roles neither fetch nor render billing aggregates outside protected Billing or reporting modules.
+- [x] Review the existing OAuth session architecture and define a safe credential-based demo sign-in path.
+- [x] Add password-hash storage and local credential-session support without weakening the existing OAuth path.
+- [x] Provision distinct Admin, Doctor, and Receptionist demo accounts with clinician linkage where appropriate.
+- [x] Build a credential sign-in form and visible demo account guidance in the signed-out experience.
+- [x] Test valid and invalid credentials, logout, each role session, and protected module access.
+- [x] Add a visible demo access panel that presents the Admin, Doctor, and Receptionist credential guidance on the signed-out page.
+- [x] Verify the signed-out UI renders the credential guidance panel alongside the form and OAuth fallback.
+- [x] Define administrator account lifecycle permissions and Admin/Receptionist patient and appointment edit boundaries.
+- [x] Add persistent account deactivation support and secure account create, edit, reset-password, and deactivate procedures.
+- [x] Add protected patient-record and appointment-detail update procedures for Admins and Receptionists.
+- [x] Build an administrator-only account management dashboard with credential lifecycle controls.
+- [x] Add patient and appointment edit interfaces for Admin and Receptionist operational workflows.
+- [x] Test lifecycle operations, deactivated-account login rejection, edit authorization, persistence, TypeScript, production build, and responsive UI.
+- [x] Ensure account-management queries never return password hashes or other credential secrets to the browser.
+- [x] Clear role-scoped query caches on credential login and logout so a subsequent role session cannot inherit stale Administrator UI state.
+- [x] Browser-test the new account-management dashboard and patient/appointment edit workflows at a narrow viewport, correct any layout issue, and document the result.
+- [x] Keep patient and appointment edit actions visibly reachable on narrow tables without requiring a horizontal scroll to the final action column.
+- [x] Sign in as Administrator and re-test the Reports account-management dashboard at a narrow viewport.
+- [x] Add Administrator-specific narrow-screen verification evidence to the HMS validation record.
+- [x] Define safe Admin/Receptionist deletion rules for appointment and patient records, preserving clinically or financially linked data.
+- [x] Add an optional patient-facing appointment display name to appointment creation and editing workflows.
+- [x] Add protected appointment and patient deletion procedures with server-side role enforcement and integrity checks.
+- [x] Build confirmation-based appointment and patient deletion controls for authorized operational roles.
+- [x] Test appointment naming, deletion permissions, integrity protection, persistence, TypeScript, production build, and responsive workflows.
+- [x] Verify the appointment-name booking field and patient/appointment deletion controls inside their open dialogs at a narrow viewport, then document the result.
+- [x] Document external Vercel deployment prerequisites and the built-in hosting alternative.
+- [x] Define archive retention, archive/restore role boundaries, and conflict rules for patient and appointment recovery.
+- [x] Replace operational hard deletion with persistent soft deletion for patient and appointment records.
+- [x] Add protected archive listing and restore procedures, including conflict and integrity checks.
+- [x] Build a detailed archival confirmation modal that explains record state, retention, and recovery consequences.
+- [x] Build an authorized archive workspace for viewing and restoring archived patients and appointments.
+- [x] Add Vercel-compatible Express entrypoint, static-output configuration, and deployment metadata.
+- [x] Test archive, restore, authorization, Vercel build configuration, TypeScript, production build, and responsive recovery workflows.
+- [x] Verify the Archive workspace’s restore controls with temporary archived records at a narrow viewport, then document the result.
+- [x] Package the full HMS source, migrations, documentation, verification scripts, and Vercel configuration into a downloadable ZIP archive.

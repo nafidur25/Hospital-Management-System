@@ -1,0 +1,1 @@
+ALTER TABLE `hms_appointments` ADD `display_name` varchar(140);

@@ -1,0 +1,1432 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "4ea5505e-d3ff-4ea6-94a4-18b3f63b6b59",
+  "prevId": "d2ca8336-7665-458f-9ba5-78ac76d33cc8",
+  "tables": {
+    "hms_appointments": {
+      "name": "hms_appointments",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "appointment_code": {
+          "name": "appointment_code",
+          "type": "varchar(28)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "clinician_id": {
+          "name": "clinician_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ends_at": {
+          "name": "ends_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "varchar(240)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('Scheduled','Checked in','Completed','Cancelled')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Scheduled'"
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_appointments_code_uq": {
+          "name": "hms_appointments_code_uq",
+          "columns": [
+            "appointment_code"
+          ],
+          "isUnique": true
+        },
+        "hms_appointments_clinician_time_idx": {
+          "name": "hms_appointments_clinician_time_idx",
+          "columns": [
+            "clinician_id",
+            "starts_at"
+          ],
+          "isUnique": false
+        },
+        "hms_appointments_patient_time_idx": {
+          "name": "hms_appointments_patient_time_idx",
+          "columns": [
+            "patient_id",
+            "starts_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hms_appointments_patient_id_hms_patients_id_fk": {
+          "name": "hms_appointments_patient_id_hms_patients_id_fk",
+          "tableFrom": "hms_appointments",
+          "tableTo": "hms_patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "hms_appointments_clinician_id_hms_clinicians_id_fk": {
+          "name": "hms_appointments_clinician_id_hms_clinicians_id_fk",
+          "tableFrom": "hms_appointments",
+          "tableTo": "hms_clinicians",
+          "columnsFrom": [
+            "clinician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "hms_appointments_created_by_user_id_users_id_fk": {
+          "name": "hms_appointments_created_by_user_id_users_id_fk",
+          "tableFrom": "hms_appointments",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_appointments_id": {
+          "name": "hms_appointments_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_availability_windows": {
+      "name": "hms_availability_windows",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "clinician_id": {
+          "name": "clinician_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "start_minute": {
+          "name": "start_minute",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_minute": {
+          "name": "end_minute",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "slot_minutes": {
+          "name": "slot_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 30
+        }
+      },
+      "indexes": {
+        "hms_availability_clinician_day_idx": {
+          "name": "hms_availability_clinician_day_idx",
+          "columns": [
+            "clinician_id",
+            "weekday"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hms_availability_windows_clinician_id_hms_clinicians_id_fk": {
+          "name": "hms_availability_windows_clinician_id_hms_clinicians_id_fk",
+          "tableFrom": "hms_availability_windows",
+          "tableTo": "hms_clinicians",
+          "columnsFrom": [
+            "clinician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_availability_windows_id": {
+          "name": "hms_availability_windows_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_bills": {
+      "name": "hms_bills",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "bill_code": {
+          "name": "bill_code",
+          "type": "varchar(28)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "appointment_id": {
+          "name": "appointment_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('Paid','Partial','Due','Cancelled')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Due'"
+        },
+        "issued_at": {
+          "name": "issued_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_bills_code_uq": {
+          "name": "hms_bills_code_uq",
+          "columns": [
+            "bill_code"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "hms_bills_patient_id_hms_patients_id_fk": {
+          "name": "hms_bills_patient_id_hms_patients_id_fk",
+          "tableFrom": "hms_bills",
+          "tableTo": "hms_patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "hms_bills_appointment_id_hms_appointments_id_fk": {
+          "name": "hms_bills_appointment_id_hms_appointments_id_fk",
+          "tableFrom": "hms_bills",
+          "tableTo": "hms_appointments",
+          "columnsFrom": [
+            "appointment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_bills_id": {
+          "name": "hms_bills_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_clinical_notes": {
+      "name": "hms_clinical_notes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "appointment_id": {
+          "name": "appointment_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "author_clinician_id": {
+          "name": "author_clinician_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "author_user_id": {
+          "name": "author_user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subjective": {
+          "name": "subjective",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "assessment": {
+          "name": "assessment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "plan": {
+          "name": "plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_clinical_notes_patient_idx": {
+          "name": "hms_clinical_notes_patient_idx",
+          "columns": [
+            "patient_id",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hms_clinical_notes_patient_id_hms_patients_id_fk": {
+          "name": "hms_clinical_notes_patient_id_hms_patients_id_fk",
+          "tableFrom": "hms_clinical_notes",
+          "tableTo": "hms_patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "hms_clinical_notes_appointment_id_hms_appointments_id_fk": {
+          "name": "hms_clinical_notes_appointment_id_hms_appointments_id_fk",
+          "tableFrom": "hms_clinical_notes",
+          "tableTo": "hms_appointments",
+          "columnsFrom": [
+            "appointment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "hms_clinical_notes_author_clinician_id_hms_clinicians_id_fk": {
+          "name": "hms_clinical_notes_author_clinician_id_hms_clinicians_id_fk",
+          "tableFrom": "hms_clinical_notes",
+          "tableTo": "hms_clinicians",
+          "columnsFrom": [
+            "author_clinician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "hms_clinical_notes_author_user_id_users_id_fk": {
+          "name": "hms_clinical_notes_author_user_id_users_id_fk",
+          "tableFrom": "hms_clinical_notes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "author_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_clinical_notes_id": {
+          "name": "hms_clinical_notes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_clinicians": {
+      "name": "hms_clinicians",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "varchar(140)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "specialty": {
+          "name": "specialty",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "department": {
+          "name": "department",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "color": {
+          "name": "color",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'#007C83'"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "enum('yes','no')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'yes'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_clinicians_user_uq": {
+          "name": "hms_clinicians_user_uq",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "hms_clinicians_user_id_users_id_fk": {
+          "name": "hms_clinicians_user_id_users_id_fk",
+          "tableFrom": "hms_clinicians",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_clinicians_id": {
+          "name": "hms_clinicians_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_laboratory_orders": {
+      "name": "hms_laboratory_orders",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "order_code": {
+          "name": "order_code",
+          "type": "varchar(28)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "appointment_id": {
+          "name": "appointment_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ordering_clinician_id": {
+          "name": "ordering_clinician_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "author_user_id": {
+          "name": "author_user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "test_name": {
+          "name": "test_name",
+          "type": "varchar(180)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "enum('Routine','Urgent')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Routine'"
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('Ordered','Collected','Resulted','Cancelled')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Ordered'"
+        },
+        "clinical_question": {
+          "name": "clinical_question",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ordered_at": {
+          "name": "ordered_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_laboratory_orders_code_uq": {
+          "name": "hms_laboratory_orders_code_uq",
+          "columns": [
+            "order_code"
+          ],
+          "isUnique": true
+        },
+        "hms_lab_orders_patient_idx": {
+          "name": "hms_lab_orders_patient_idx",
+          "columns": [
+            "patient_id",
+            "ordered_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hms_laboratory_orders_patient_id_hms_patients_id_fk": {
+          "name": "hms_laboratory_orders_patient_id_hms_patients_id_fk",
+          "tableFrom": "hms_laboratory_orders",
+          "tableTo": "hms_patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "hms_laboratory_orders_appointment_id_hms_appointments_id_fk": {
+          "name": "hms_laboratory_orders_appointment_id_hms_appointments_id_fk",
+          "tableFrom": "hms_laboratory_orders",
+          "tableTo": "hms_appointments",
+          "columnsFrom": [
+            "appointment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "hms_laboratory_orders_ordering_clinician_id_hms_clinicians_id_fk": {
+          "name": "hms_laboratory_orders_ordering_clinician_id_hms_clinicians_id_fk",
+          "tableFrom": "hms_laboratory_orders",
+          "tableTo": "hms_clinicians",
+          "columnsFrom": [
+            "ordering_clinician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "hms_laboratory_orders_author_user_id_users_id_fk": {
+          "name": "hms_laboratory_orders_author_user_id_users_id_fk",
+          "tableFrom": "hms_laboratory_orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "author_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_laboratory_orders_id": {
+          "name": "hms_laboratory_orders_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_laboratory_results": {
+      "name": "hms_laboratory_results",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "laboratory_order_id": {
+          "name": "laboratory_order_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reported_by_clinician_id": {
+          "name": "reported_by_clinician_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "result_summary": {
+          "name": "result_summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reference_range": {
+          "name": "reference_range",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "result_value": {
+          "name": "result_value",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reported_at": {
+          "name": "reported_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_lab_results_order_uq": {
+          "name": "hms_lab_results_order_uq",
+          "columns": [
+            "laboratory_order_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "hms_laboratory_results_laboratory_order_id_hms_laboratory_orders_id_fk": {
+          "name": "hms_laboratory_results_laboratory_order_id_hms_laboratory_orders_id_fk",
+          "tableFrom": "hms_laboratory_results",
+          "tableTo": "hms_laboratory_orders",
+          "columnsFrom": [
+            "laboratory_order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "hms_laboratory_results_reported_by_clinician_id_hms_clinicians_id_fk": {
+          "name": "hms_laboratory_results_reported_by_clinician_id_hms_clinicians_id_fk",
+          "tableFrom": "hms_laboratory_results",
+          "tableTo": "hms_clinicians",
+          "columnsFrom": [
+            "reported_by_clinician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_laboratory_results_id": {
+          "name": "hms_laboratory_results_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_patients": {
+      "name": "hms_patients",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "patient_code": {
+          "name": "patient_code",
+          "type": "varchar(24)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "varchar(140)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "gender": {
+          "name": "gender",
+          "type": "enum('Female','Male','Other','Not specified')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Not specified'"
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "care_context": {
+          "name": "care_context",
+          "type": "varchar(240)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Initial assessment'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_patients_code_uq": {
+          "name": "hms_patients_code_uq",
+          "columns": [
+            "patient_code"
+          ],
+          "isUnique": true
+        },
+        "hms_patients_phone_uq": {
+          "name": "hms_patients_phone_uq",
+          "columns": [
+            "phone"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "hms_patients_id": {
+          "name": "hms_patients_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_payments": {
+      "name": "hms_payments",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "bill_id": {
+          "name": "bill_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "enum('Cash','Card','Mobile banking','Insurance')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Cash'"
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "recorded_by_user_id": {
+          "name": "recorded_by_user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "hms_payments_bill_id_hms_bills_id_fk": {
+          "name": "hms_payments_bill_id_hms_bills_id_fk",
+          "tableFrom": "hms_payments",
+          "tableTo": "hms_bills",
+          "columnsFrom": [
+            "bill_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "hms_payments_recorded_by_user_id_users_id_fk": {
+          "name": "hms_payments_recorded_by_user_id_users_id_fk",
+          "tableFrom": "hms_payments",
+          "tableTo": "users",
+          "columnsFrom": [
+            "recorded_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_payments_id": {
+          "name": "hms_payments_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_prescription_items": {
+      "name": "hms_prescription_items",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "prescription_id": {
+          "name": "prescription_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "medicine_name": {
+          "name": "medicine_name",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dosage": {
+          "name": "dosage",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "route": {
+          "name": "route",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Oral'"
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "duration_days": {
+          "name": "duration_days",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "instructions": {
+          "name": "instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "hms_prescription_items_rx_idx": {
+          "name": "hms_prescription_items_rx_idx",
+          "columns": [
+            "prescription_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hms_prescription_items_prescription_id_hms_prescriptions_id_fk": {
+          "name": "hms_prescription_items_prescription_id_hms_prescriptions_id_fk",
+          "tableFrom": "hms_prescription_items",
+          "tableTo": "hms_prescriptions",
+          "columnsFrom": [
+            "prescription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_prescription_items_id": {
+          "name": "hms_prescription_items_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "hms_prescriptions": {
+      "name": "hms_prescriptions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "prescription_code": {
+          "name": "prescription_code",
+          "type": "varchar(28)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "appointment_id": {
+          "name": "appointment_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "prescriber_clinician_id": {
+          "name": "prescriber_clinician_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "author_user_id": {
+          "name": "author_user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('Active','Completed','Cancelled')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Active'"
+        },
+        "prescribed_at": {
+          "name": "prescribed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "hms_prescriptions_code_uq": {
+          "name": "hms_prescriptions_code_uq",
+          "columns": [
+            "prescription_code"
+          ],
+          "isUnique": true
+        },
+        "hms_prescriptions_patient_idx": {
+          "name": "hms_prescriptions_patient_idx",
+          "columns": [
+            "patient_id",
+            "prescribed_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hms_prescriptions_patient_id_hms_patients_id_fk": {
+          "name": "hms_prescriptions_patient_id_hms_patients_id_fk",
+          "tableFrom": "hms_prescriptions",
+          "tableTo": "hms_patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "hms_prescriptions_appointment_id_hms_appointments_id_fk": {
+          "name": "hms_prescriptions_appointment_id_hms_appointments_id_fk",
+          "tableFrom": "hms_prescriptions",
+          "tableTo": "hms_appointments",
+          "columnsFrom": [
+            "appointment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "hms_prescriptions_prescriber_clinician_id_hms_clinicians_id_fk": {
+          "name": "hms_prescriptions_prescriber_clinician_id_hms_clinicians_id_fk",
+          "tableFrom": "hms_prescriptions",
+          "tableTo": "hms_clinicians",
+          "columnsFrom": [
+            "prescriber_clinician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "hms_prescriptions_author_user_id_users_id_fk": {
+          "name": "hms_prescriptions_author_user_id_users_id_fk",
+          "tableFrom": "hms_prescriptions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "author_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hms_prescriptions_id": {
+          "name": "hms_prescriptions_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "openId": {
+          "name": "openId",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "loginMethod": {
+          "name": "loginMethod",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "enum('admin','doctor','receptionist')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'receptionist'"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "enum('yes','no')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'yes'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        },
+        "lastSignedIn": {
+          "name": "lastSignedIn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "users_email_uq": {
+          "name": "users_email_uq",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "users_id": {
+          "name": "users_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "users_openId_unique": {
+          "name": "users_openId_unique",
+          "columns": [
+            "openId"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    }
+  },
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
+  }
+}
