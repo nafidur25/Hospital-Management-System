@@ -3,6 +3,31 @@
 -- Paste this entire file into the Supabase SQL Editor and Run.
 -- ============================================================
 
+-- ─── Cleanup (Safe for re-running) ──────────────────────────────────────────
+
+DROP TABLE IF EXISTS hms_laboratory_results CASCADE;
+DROP TABLE IF EXISTS hms_laboratory_orders CASCADE;
+DROP TABLE IF EXISTS hms_prescription_items CASCADE;
+DROP TABLE IF EXISTS hms_prescriptions CASCADE;
+DROP TABLE IF EXISTS hms_clinical_notes CASCADE;
+DROP TABLE IF EXISTS hms_payments CASCADE;
+DROP TABLE IF EXISTS hms_bills CASCADE;
+DROP TABLE IF EXISTS hms_appointments CASCADE;
+DROP TABLE IF EXISTS hms_availability_windows CASCADE;
+DROP TABLE IF EXISTS hms_patients CASCADE;
+DROP TABLE IF EXISTS hms_clinicians CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+DROP TYPE IF EXISTS hms_lab_status CASCADE;
+DROP TYPE IF EXISTS hms_lab_priority CASCADE;
+DROP TYPE IF EXISTS hms_prescription_status CASCADE;
+DROP TYPE IF EXISTS hms_payment_method CASCADE;
+DROP TYPE IF EXISTS hms_bill_status CASCADE;
+DROP TYPE IF EXISTS hms_appointment_status CASCADE;
+DROP TYPE IF EXISTS hms_gender CASCADE;
+DROP TYPE IF EXISTS hms_is_active CASCADE;
+DROP TYPE IF EXISTS hms_role CASCADE;
+
 -- ─── Enums ───────────────────────────────────────────────────────────────────
 
 CREATE TYPE hms_role              AS ENUM ('admin', 'doctor', 'receptionist');
@@ -289,10 +314,11 @@ JOIN users            u  ON u."openId"          = n.user_open_id;
 INSERT INTO hms_prescriptions (prescription_code, patient_id, appointment_id, prescriber_clinician_id, author_user_id, notes)
 SELECT 'RX-7001', p.id, a.id, cl.id, u.id,
        'Take consistently and bring home blood-pressure readings to follow-up.'
-FROM hms_patients    p  ON  p.full_name        = 'Ayesha Rahman'
+FROM hms_patients     p
 JOIN hms_appointments a  ON  a.appointment_code = 'A-4016'
 JOIN hms_clinicians   cl ON  cl.full_name       = 'Dr. Samira Ahmed'
-JOIN users            u  ON  u."openId"          = 'demo_hms_doctor';
+JOIN users            u  ON  u."openId"          = 'demo_hms_doctor'
+WHERE p.full_name = 'Ayesha Rahman';
 
 -- Prescription Items
 INSERT INTO hms_prescription_items (prescription_id, medicine_name, dosage, route, frequency, duration_days, instructions)
@@ -304,10 +330,11 @@ INSERT INTO hms_laboratory_orders (order_code, patient_id, appointment_id, order
 SELECT 'LAB-8101', p.id, a.id, cl.id, u.id,
        'Lipid profile', 'Routine', 'Resulted',
        'Cardiovascular risk review in hypertension follow-up.'
-FROM hms_patients     p  ON  p.full_name        = 'Ayesha Rahman'
+FROM hms_patients     p
 JOIN hms_appointments a  ON  a.appointment_code = 'A-4016'
 JOIN hms_clinicians   cl ON  cl.full_name       = 'Dr. Samira Ahmed'
-JOIN users            u  ON  u."openId"          = 'demo_hms_doctor';
+JOIN users            u  ON  u."openId"          = 'demo_hms_doctor'
+WHERE p.full_name = 'Ayesha Rahman';
 
 -- Laboratory Results
 INSERT INTO hms_laboratory_results (laboratory_order_id, reported_by_clinician_id, result_summary, reference_range, result_value)
