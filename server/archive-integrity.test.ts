@@ -294,7 +294,7 @@ describe("HMS Archive and Recovery Integrity Tests", () => {
 
       const result = await restoreAppointment(20);
       expect(result.success).toBe(true);
-      expect(setMock).toHaveBeenCalledWith({ archivedAt: null });
+      expect(setMock).toHaveBeenCalledWith(expect.objectContaining({ archivedAt: null }));
     });
   });
 });

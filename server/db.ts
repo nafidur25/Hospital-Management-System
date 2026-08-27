@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, lt, ne } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import {
   appointments,
@@ -43,7 +44,13 @@ export function setDb(db: any) {
 }
 
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) _db = drizzle(process.env.DATABASE_URL);
+  if (!_db && process.env.DATABASE_URL) {
+    const client = postgres(process.env.DATABASE_URL, {
+      ssl: process.env.DATABASE_URL.includes("localhost") ? false : { rejectUnauthorized: false },
+      max: 10,
+    });
+    _db = drizzle(client);
+  }
   return _db;
 }
 
@@ -227,7 +234,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = "admin";
       updateSet.role = "admin";
     }
-    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+    await db.insert(users).values(values).onConflictDoUpdate({ target: users.openId, set: updateSet });
     return;
   }
 
@@ -274,7 +281,7 @@ export async function ensureDemoCredentialAccounts() {
   const db = await getDb();
   if (db) {
     for (const account of DEMO_ACCOUNTS) {
-      await db.insert(users).values({ openId: account.openId, email: account.email, name: account.name, loginMethod: "credential-demo", passwordHash: account.passwordHash, role: account.role, isActive: "yes", lastSignedIn: new Date() }).onDuplicateKeyUpdate({ set: { email: account.email, name: account.name, loginMethod: "credential-demo" } });
+      await db.insert(users).values({ openId: account.openId, email: account.email, name: account.name, loginMethod: "credential-demo", passwordHash: account.passwordHash, role: account.role, isActive: "yes", lastSignedIn: new Date() }).onConflictDoUpdate({ target: users.openId, set: { email: account.email, name: account.name, loginMethod: "credential-demo" } });
     }
     const doctor = (await db.select().from(users).where(eq(users.openId, "demo_hms_doctor")).limit(1))[0];
     const clinician = (await db.select().from(clinicians).where(eq(clinicians.fullName, "Dr. Samira Ahmed")).limit(1))[0];
@@ -297,7 +304,7 @@ export async function authenticateDemoCredentials(email: string, password: strin
   if (db) {
     const user = (await db.select().from(users).where(eq(users.email, email.trim().toLowerCase())).limit(1))[0];
     if (!user || user.isActive !== "yes" || user.loginMethod !== "credential-demo" || !user.passwordHash || !verifyPassword(password, user.passwordHash)) return undefined;
-    await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
+    await db.update(users).set({ lastSignedIn: new Date(), updatedAt: new Date() }).where(eq(users.id, user.id));
     return (await db.select().from(users).where(eq(users.id, user.id)).limit(1))[0];
   }
 
@@ -376,7 +383,7 @@ export async function updateManagedAccount(input: { userId: number; name: string
   const db = await getDb();
   if (db) {
     await db.transaction(async (tx) => {
-      await tx.update(users).set({ name: input.name.trim(), email: input.email.trim().toLowerCase(), role: input.role }).where(eq(users.id, input.userId));
+      await tx.update(users).set({ name: input.name.trim(), email: input.email.trim().toLowerCase(), role: input.role, updatedAt: new Date() }).where(eq(users.id, input.userId));
       if (input.clinicianId !== undefined) {
         await tx.update(clinicians).set({ userId: null }).where(eq(clinicians.userId, input.userId));
         if (input.clinicianId) await tx.update(clinicians).set({ userId: input.userId }).where(eq(clinicians.id, input.clinicianId));
@@ -406,7 +413,7 @@ export async function updateManagedAccount(input: { userId: number; name: string
 export async function resetManagedAccountPassword(userId: number, password: string) {
   const db = await getDb();
   if (db) {
-    await db.update(users).set({ passwordHash: hashPassword(password), loginMethod: "credential-demo" }).where(eq(users.id, userId));
+    await db.update(users).set({ passwordHash: hashPassword(password), loginMethod: "credential-demo", updatedAt: new Date() }).where(eq(users.id, userId));
     return { success: true } as const;
   }
   initMemoryDb();
@@ -421,7 +428,7 @@ export async function resetManagedAccountPassword(userId: number, password: stri
 export async function setManagedAccountActive(userId: number, isActive: "yes" | "no") {
   const db = await getDb();
   if (db) {
-    await db.update(users).set({ isActive }).where(eq(users.id, userId));
+    await db.update(users).set({ isActive, updatedAt: new Date() }).where(eq(users.id, userId));
     return { success: true } as const;
   }
   initMemoryDb();
@@ -700,7 +707,7 @@ export async function updateAppointment(input: { appointmentId: number; patientI
         tx.select().from(appointments).where(and(eq(appointments.clinicianId, input.clinicianId), isNull(appointments.archivedAt), ne(appointments.id, input.appointmentId), ne(appointments.status, "Cancelled"), lt(appointments.startsAt, endsAt), gt(appointments.endsAt, startsAt))),
       ]);
       validateBookingRequest(startsAt, endsAt, clinicianWindows, scheduled);
-      await tx.update(appointments).set({ patientId: input.patientId, clinicianId: input.clinicianId, startsAt, endsAt, displayName: input.displayName?.trim() || null, reason: input.reason.trim() }).where(eq(appointments.id, input.appointmentId));
+      await tx.update(appointments).set({ patientId: input.patientId, clinicianId: input.clinicianId, startsAt, endsAt, displayName: input.displayName?.trim() || null, reason: input.reason.trim(), updatedAt: new Date() }).where(eq(appointments.id, input.appointmentId));
       return (await tx.select().from(appointments).where(eq(appointments.id, input.appointmentId)).limit(1))[0]!;
     });
   }
@@ -741,7 +748,7 @@ export async function archiveAppointment(input: { appointmentId: number; userId:
       ]);
       if ([linkedBills, linkedNotes, linkedPrescriptions, linkedOrders].some((rows) => rows.length > 0)) throw new Error("This appointment has linked billing or clinical records and must remain active.");
       const archivedAt = new Date();
-      await tx.update(appointments).set({ archivedAt, archivedByUserId: input.userId }).where(eq(appointments.id, input.appointmentId));
+      await tx.update(appointments).set({ archivedAt, archivedByUserId: input.userId, updatedAt: new Date() }).where(eq(appointments.id, input.appointmentId));
       return { success: true, archivedAt } as const;
     });
   }
@@ -875,7 +882,7 @@ export async function restoreAppointment(appointmentId: number) {
         ]);
         validateBookingRequest(new Date(appointment.startsAt), new Date(appointment.endsAt), clinicianWindows, scheduled);
       }
-      await tx.update(appointments).set({ archivedAt: null }).where(eq(appointments.id, appointmentId));
+      await tx.update(appointments).set({ archivedAt: null, updatedAt: new Date() }).where(eq(appointments.id, appointmentId));
       return { success: true } as const;
     });
   }
@@ -902,7 +909,7 @@ export async function restoreAppointment(appointmentId: number) {
 export async function updateAppointmentStatus(appointmentId: number, status: AppointmentStatus) {
   const db = await getDb();
   if (db) {
-    await db.update(appointments).set({ status }).where(and(eq(appointments.id, appointmentId), isNull(appointments.archivedAt)));
+    await db.update(appointments).set({ status, updatedAt: new Date() }).where(and(eq(appointments.id, appointmentId), isNull(appointments.archivedAt)));
     return { success: true } as const;
   }
   initMemoryDb();
@@ -1157,7 +1164,7 @@ export async function updateStaffRole(input: { userId: number; role: HmsRole; cl
   const db = await getDb();
   if (db) {
     await db.transaction(async (tx) => {
-      await tx.update(users).set({ role: input.role }).where(eq(users.id, input.userId));
+      await tx.update(users).set({ role: input.role, updatedAt: new Date() }).where(eq(users.id, input.userId));
       if (input.clinicianId) await tx.update(clinicians).set({ userId: input.userId }).where(eq(clinicians.id, input.clinicianId));
     });
     return { success: true } as const;
