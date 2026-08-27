@@ -1,10 +1,10 @@
 import React, { type FormEvent, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { clearHmsSessionCache } from "@/lib/sessionCache";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, KeyRound, Loader2, LockKeyhole, ShieldCheck, UserCheck } from "lucide-react";
+import { COOKIE_NAME } from "@shared/const";
+import { CalendarDays, KeyRound, Loader2, ShieldCheck, UserCheck } from "lucide-react";
 
 const DEMO_PRESETS = [
   { role: "Admin", email: "admin@clinicalledger.demo", pass: "CL-Admin!2026", desc: "Full operations & audit" },
@@ -20,7 +20,14 @@ function CredentialSignIn() {
   const [selectedRole, setSelectedRole] = useState<string>("Admin");
 
   const login = trpc.auth.demoLogin.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data) => {
+      if (data?.token) {
+        try {
+          sessionStorage.setItem("manus-cookie", `${COOKIE_NAME}=${data.token}`);
+        } catch {
+          // ignore storage error
+        }
+      }
       await clearHmsSessionCache(queryClient);
       await utils.auth.me.invalidate();
     },
@@ -160,21 +167,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </p>
 
           <CredentialSignIn />
-
-          <div className="my-6 flex items-center gap-3 text-[10px] font-extrabold uppercase tracking-[.13em] text-[#96a29b]">
-            <span className="h-px flex-1 bg-[#e9efea]" />
-            or
-            <span className="h-px flex-1 bg-[#e9efea]" />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => startLogin()}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#cde4e2] bg-[#f2fbfa] px-5 py-3 text-sm font-extrabold text-[#007c83] transition-transform duration-150 active:scale-[.98] hover:bg-[#e6f6f5]"
-          >
-            <LockKeyhole className="h-4 w-4" />
-            Continue with Manus sign in
-          </button>
 
           <div className="mt-6 flex items-center gap-3 border-t border-[#e9efea] pt-4 text-xs text-[#82909a]">
             <CalendarDays className="h-4 w-4 shrink-0 text-[#007c83]" />

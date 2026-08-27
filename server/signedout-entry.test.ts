@@ -29,7 +29,6 @@ describe("signed-out HMS entry", () => {
     expect(markup).toContain("admin@clinicalledger.demo");
     expect(markup).toContain("doctor@clinicalledger.demo");
     expect(markup).toContain("reception@clinicalledger.demo");
-    expect(markup).toContain("Continue with Manus sign in");
     expect(markup).toContain("Protected clinical workspace");
     expect(markup).not.toContain("Protected HMS content");
   });
