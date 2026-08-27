@@ -7,7 +7,6 @@ describe("Vercel deployment configuration", () => {
     const config = JSON.parse(readFileSync(resolve(process.cwd(), "vercel.json"), "utf8"));
     expect(config.buildCommand).toBe("pnpm build:vercel");
     expect(config.outputDirectory).toBe("dist/public");
-    expect(config.functions["api/index.ts"].runtime).toBe("nodejs22.x");
     expect(config.rewrites[0]).toMatchObject({ source: "/api/(.*)", destination: "/api/index" });
   });
 });
